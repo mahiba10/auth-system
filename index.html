@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Auth System</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container { width: 100%; max-width: 420px; padding: 20px; }
+
+    .card {
+      background: #1e293b;
+      border-radius: 16px;
+      padding: 36px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .logo h1 { font-size: 24px; font-weight: 700; color: #6366f1; }
+    .logo p  { font-size: 13px; color: #94a3b8; margin-top: 4px; }
+
+    .tabs {
+      display: flex;
+      background: #0f172a;
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #64748b;
+      transition: all 0.2s;
+      border: none;
+      background: none;
+    }
+
+    .tab.active { background: #6366f1; color: white; }
+
+    .form { display: none; flex-direction: column; gap: 16px; }
+    .form.active { display: flex; }
+
+    label { font-size: 13px; color: #94a3b8; margin-bottom: 4px; display: block; }
+
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      color: #f1f5f9;
+      font-size: 14px;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    input:focus { border-color: #6366f1; }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 13px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 4px;
+    }
+
+    button[type="submit"]:hover { background: #4f46e5; }
+    button[type="submit"]:disabled { background: #334155; cursor: not-allowed; }
+
+    .msg {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      display: none;
+    }
+
+    .msg.success { background: #052e16; color: #4ade80; border: 1px solid #166534; display: block; }
+    .msg.error   { background: #2d0a0a; color: #f87171; border: 1px solid #7f1d1d; display: block; }
+
+    /* Dashboard */
+    .dashboard { display: none; flex-direction: column; gap: 20px; }
+    .dashboard.active { display: flex; }
+
+    .welcome {
+      text-align: center;
+      padding: 20px 0 10px;
+    }
+
+    .avatar {
+      width: 64px; height: 64px;
+      background: #6366f1;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 700;
+      margin: 0 auto 12px;
+    }
+
+    .welcome h2 { font-size: 20px; font-weight: 700; }
+    .welcome p  { font-size: 13px; color: #94a3b8; margin-top: 4px; }
+
+    .info-box {
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .info-row span:first-child { color: #64748b; }
+    .info-row span:last-child  { color: #e2e8f0; font-weight: 500; }
+
+    .token-box {
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .token-box p { font-size: 12px; color: #64748b; margin-bottom: 8px; }
+
+    .token-text {
+      font-size: 11px;
+      color: #6366f1;
+      word-break: break-all;
+      line-height: 1.6;
+    }
+
+    .logout-btn {
+      width: 100%;
+      padding: 13px;
+      background: transparent;
+      color: #f87171;
+      border: 1px solid #7f1d1d;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .logout-btn:hover { background: #2d0a0a; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+
+    <!-- Auth Forms -->
+    <div id="authSection">
+      <div class="logo">
+        <h1>🔐 AuthSystem</h1>
+        <p>Secure JWT Authentication</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('login')">Login</button>
+        <button class="tab" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="msg-login" class="msg"></div>
+      <div class="form active" id="loginForm">
+        <div>
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="john@example.com" />
+        </div>
+        <div>
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" />
+        </div>
+        <button type="submit" id="loginBtn" onclick="login()">Login</button>
+      </div>
+
+      <!-- Register Form -->
+      <div id="msg-register" class="msg"></div>
+      <div class="form" id="registerForm">
+        <div>
+          <label>Full Name</label>
+          <input type="text" id="reg-name" placeholder="John Doe" />
+        </div>
+        <div>
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="john@example.com" />
+        </div>
+        <div>
+          <label>Password</label>
+          <input type="password" id="reg-password" placeholder="Min 6 characters" />
+        </div>
+        <button type="submit" id="registerBtn" onclick="register()">Create Account</button>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+      <div class="welcome">
+        <div class="avatar" id="avatarLetter">J</div>
+        <h2 id="dashName">John Doe</h2>
+        <p id="dashEmail">john@example.com</p>
+      </div>
+
+      <div class="info-box">
+        <div class="info-row">
+          <span>User ID</span>
+          <span id="dashId">—</span>
+        </div>
+        <div class="info-row">
+          <span>Member Since</span>
+          <span id="dashDate">—</span>
+        </div>
+        <div class="info-row">
+          <span>Status</span>
+          <span style="color:#4ade80">● Active</span>
+        </div>
+      </div>
+
+      <div class="token-box">
+        <p>🔑 JWT Token</p>
+        <div class="token-text" id="dashToken">—</div>
+      </div>
+
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const API = "http://localhost:5000/api/auth";
+  let activeTab = "login";
+
+  function switchTab(tab) {
+    activeTab = tab;
+    document.querySelectorAll(".tab").forEach((t, i) => {
+      t.classList.toggle("active", (tab === "login" && i === 0) || (tab === "register" && i === 1));
+    });
+    document.getElementById("loginForm").classList.toggle("active", tab === "login");
+    document.getElementById("registerForm").classList.toggle("active", tab === "register");
+    clearMsg();
+  }
+
+  function showMsg(form, text, type) {
+    const el = document.getElementById(`msg-${form}`);
+    el.textContent = text;
+    el.className = `msg ${type}`;
+  }
+
+  function clearMsg() {
+    document.querySelectorAll(".msg").forEach(m => m.className = "msg");
+  }
+
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.textContent = loading ? "Please wait..." : (btnId === "loginBtn" ? "Login" : "Create Account");
+  }
+
+  async function login() {
+    const email    = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value;
+
+    if (!email || !password) return showMsg("login", "Please fill in all fields", "error");
+
+    setLoading("loginBtn", true);
+    try {
+      const res  = await fetch(`${API}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showDashboard(data.token, data.data.user);
+      } else {
+        showMsg("login", data.message, "error");
+      }
+    } catch {
+      showMsg("login", "Cannot connect to server. Is it running?", "error");
+    }
+    setLoading("loginBtn", false);
+  }
+
+  async function register() {
+    const name     = document.getElementById("reg-name").value.trim();
+    const email    = document.getElementById("reg-email").value.trim();
+    const password = document.getElementById("reg-password").value;
+
+    if (!name || !email || !password) return showMsg("register", "Please fill in all fields", "error");
+    if (password.length < 6) return showMsg("register", "Password must be at least 6 characters", "error");
+
+    setLoading("registerBtn", true);
+    try {
+      const res  = await fetch(`${API}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showDashboard(data.token, data.data.user);
+      } else {
+        showMsg("register", data.message, "error");
+      }
+    } catch {
+      showMsg("register", "Cannot connect to server. Is it running?", "error");
+    }
+    setLoading("registerBtn", false);
+  }
+
+  function showDashboard(token, user) {
+    document.getElementById("authSection").style.display = "none";
+    document.getElementById("dashboard").classList.add("active");
+
+    document.getElementById("avatarLetter").textContent = user.name.charAt(0).toUpperCase();
+    document.getElementById("dashName").textContent  = user.name;
+    document.getElementById("dashEmail").textContent = user.email;
+    document.getElementById("dashId").textContent    = user._id.slice(-8) + "...";
+    document.getElementById("dashDate").textContent  = new Date(user.createdAt).toLocaleDateString();
+    document.getElementById("dashToken").textContent = token.slice(0, 40) + "...";
+  }
+
+  function logout() {
+    document.getElementById("authSection").style.display = "block";
+    document.getElementById("dashboard").classList.remove("active");
+    document.getElementById("login-email").value    = "";
+    document.getElementById("login-password").value = "";
+    switchTab("login");
+  }
+</script>
+</body>
+</html>
